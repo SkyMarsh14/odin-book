@@ -151,4 +151,4 @@ sftp-config.json
 .vscode/
 
 ### Prisma ###
-/generated/prisma
+**/generated
