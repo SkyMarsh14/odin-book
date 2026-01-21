@@ -8,7 +8,7 @@ const createUserValidation = [
     .isLength({ min: 4, max: 30 })
     .withMessage("Username must be between 4 to 30 characters.")
     .custom(async (username) => {
-      const user = await prisma.user.findFirst({
+      const user = await prisma.user.findUnique({
         where: {
           name: username,
         },

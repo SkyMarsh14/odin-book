@@ -3,6 +3,7 @@ import { createUserValidation, loginValidation } from "../lib/validator.js";
 import bcrypt from "bcryptjs";
 import prisma from "../lib/prisma.js";
 import jwt from "jsonwebtoken";
+import createUser from "../lib/createUser.js";
 
 const authController = {
   createUser: [
@@ -14,12 +15,9 @@ const authController = {
           return res.status(400).json({ errors: errors.array() });
         }
         const { username, password } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const userData = await createUser(username, password);
         const user = await prisma.user.create({
-          data: {
-            name: username,
-            password: hashedPassword,
-          },
+          data: userData,
         });
         delete user.password;
         return res.json(user);
@@ -40,7 +38,6 @@ const authController = {
         const user = await prisma.user.findUnique({
           where: {
             name: username,
-            password,
           },
         });
         if (!user)
