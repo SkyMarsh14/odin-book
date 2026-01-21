@@ -3,6 +3,8 @@ import "dotenv/config";
 import cors from "cors";
 import authRouter from "./routes/authRouter.js";
 import errorGlobal from "./middleware/errorGlobal.js";
+import postRouter from "./routes/postRouter.js";
+import protectRoute from "./middleware/protectRoute.js";
 
 const app = express();
 app.use(cors());
@@ -10,7 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/", authRouter);
-
+app.use("/post", protectRoute, postRouter);
 app.use(errorGlobal);
 
 app.use("/*w", (req, res) => {
