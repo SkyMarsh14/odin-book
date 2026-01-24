@@ -14,7 +14,7 @@ const postImgUploader = async (req, postId) => {
   try {
     const fileData = datauri(req);
     const res = await cloudinary.uploader.upload(fileData, {
-      folder: process.env_CLOUDINARY_POST_FOLDER,
+      folder: process.env.CLOUDINARY_POST_FOLDER,
     });
     const file = await prisma.file.create({
       data: {
