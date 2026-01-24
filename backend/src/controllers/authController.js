@@ -59,7 +59,7 @@ const authController = {
             email: user.email,
           },
           process.env.TOKEN_SECRET,
-          { expiresIn: "1h" },
+          { expiresIn: "10h" },
         );
         return res.json({ token, user });
       } catch (err) {

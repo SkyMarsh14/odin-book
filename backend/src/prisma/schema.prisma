@@ -23,8 +23,26 @@ model User {
 
 model Post {
   id        Int      @id @default(autoincrement())
-  content   String
+  content   String?
   createdAt DateTime @default(now())
   author    User     @relation(fields: [authorId], references: [id])
   authorId  Int
+  file      File?
+}
+
+model File {
+  id        Int      @id @default(autoincrement())
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int      @unique
+  public_id String
+  url       String
+  bytes     Int
+  mimetype  String
+  type      FileType
+}
+
+enum FileType {
+  Post
+  Profile
+  Comment
 }

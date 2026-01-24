@@ -63,8 +63,15 @@ const validator = {
   postValidation: [
     body("content")
       .trim()
-      .isEmpty()
-      .withMessage("Content cannot be empty")
+      .custom((value, { req }) => {
+        if (!value && !req.file) {
+          throw new Error(
+            "Either text or a file content is required for a post.",
+          );
+        }
+        return true;
+      })
+      .if((value) => value) // Performs length check only if the content exists
       .isLength({ min: 1, max: 280 })
       .withMessage("Content must be between 1 to 280 characters"),
   ],
