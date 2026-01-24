@@ -19,7 +19,7 @@ const postController = {
         const post = await prisma.post.create({
           data: {
             authorId: req.user.id,
-            ...(content && { content: content }),
+            ...(content && { content: content }), // Spread operator to add content property only if it exists
           },
         });
         response.post = post;
@@ -65,5 +65,32 @@ const postController = {
       next(err);
     }
   },
+  edit: [
+    validator.postValidation,
+    async (req, res, next) => {
+      try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.status(400).json({ errors: errors.array() });
+        }
+        const postId = Number(req.params.postId);
+        const post = await prisma.post.update({
+          where: {
+            id: postId,
+          },
+          data: {
+            content: req.body.content,
+          },
+        });
+        return res.json({
+          sucess: true,
+          updatedPost: post,
+          msg: `Post (ID: ${postId}) has been successfully updated`,
+        });
+      } catch (err) {
+        next(err);
+      }
+    },
+  ],
 };
 export default postController;
