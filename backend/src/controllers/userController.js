@@ -34,14 +34,17 @@ const userController = {
     }
   },
   getUserInfo: async (req, res, next) => {
-    const { userId } = req.params.userId;
     const user = await prisma.user.findUnique({
       where: {
         id: +req.user.id,
       },
       include: {
-        following: true,
-        followedBy: true,
+        _count: {
+          select: {
+            followedBy: true,
+            following: true,
+          },
+        },
       },
     });
     return res.json(user);
