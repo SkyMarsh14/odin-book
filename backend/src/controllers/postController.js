@@ -4,6 +4,21 @@ import postImgUploader from "../lib/postImgUplaoder.js";
 import { validationResult } from "express-validator";
 import { v2 as cloudinary } from "cloudinary";
 const postController = {
+  getPost: async (req, res, next) => {
+    try {
+      const post = await prisma.post.findUnique({
+        where: {
+          id: +req.params.postId,
+        },
+        include: {
+          file: true,
+        },
+      });
+      return res.json(post);
+    } catch (err) {
+      next(err);
+    }
+  },
   create: [
     validator.postValidation,
     async (req, res, next) => {
@@ -81,6 +96,9 @@ const postController = {
           data: {
             content: req.body.content,
           },
+          include: {
+            file: true,
+          },
         });
         return res.json({
           sucess: true,
@@ -92,5 +110,29 @@ const postController = {
       }
     },
   ],
+  addFile: async (req, res, next) => {
+    try {
+      const postId = +req.params.postId;
+      const fileData = await postImgUploader(req, postId);
+      const post = await prisma.post.update({
+        where: {
+          id: postId,
+        },
+        data: {
+          file: {
+            connect: {
+              id: fileData.id,
+            },
+          },
+        },
+        include: {
+          file: true,
+        },
+      });
+      return res.json(post);
+    } catch (err) {
+      next(err);
+    }
+  },
 };
 export default postController;

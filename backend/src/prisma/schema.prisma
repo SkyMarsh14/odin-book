@@ -15,15 +15,18 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  name     String @unique
-  password String
-  posts    Post[]
+  id         Int    @id @default(autoincrement())
+  name       String @unique
+  password   String
+  posts      Post[]
+  followedBy User[] @relation("UserFollowers")
+  following  User[] @relation("UserFollowers")
 }
 
 model Post {
   id        Int      @id @default(autoincrement())
   content   String?
+  like      Int      @default(0)
   createdAt DateTime @default(now())
   author    User     @relation(fields: [authorId], references: [id])
   authorId  Int

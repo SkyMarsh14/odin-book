@@ -1,20 +1,13 @@
 import { v2 as cloudinary } from "cloudinary";
 import prisma from "./prisma.js";
-import DataURIParser from "datauri/parser.js";
-import path from "path";
+import datauri from "./datauri.js";
 
-const parser = new DataURIParser();
-const datauri = (req) => {
-  return parser.format(
-    path.extname(req.file.originalname).toString(),
-    req.file.buffer,
-  ).content;
-};
 const postImgUploader = async (req, postId) => {
   try {
+    const postFolder = process.env.CLOUDINARY_POST_FOLDER;
     const fileData = datauri(req);
     const res = await cloudinary.uploader.upload(fileData, {
-      folder: process.env.CLOUDINARY_POST_FOLDER,
+      folder: postFolder,
     });
     const file = await prisma.file.create({
       data: {
