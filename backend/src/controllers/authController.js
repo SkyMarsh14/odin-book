@@ -4,12 +4,14 @@ import bcrypt from "bcryptjs";
 import prisma from "../lib/prisma.js";
 import jwt from "jsonwebtoken";
 import createUser from "../lib/createUser.js";
+import profileImgUploader from "../lib/profileImgUploader.js";
 
 const authController = {
   createUser: [
     validator.createUser,
     async (req, res, next) => {
       try {
+        let profile;
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
           return res.status(400).json({ errors: errors.array() });
@@ -19,9 +21,12 @@ const authController = {
         const user = await prisma.user.create({
           data: userData,
         });
-        return res.json(user);
+        if (req?.file) {
+          profile = await profileImgUploader.create(req, user.id);
+        }
+        return res.json({ profile, user });
       } catch (err) {
-        throw new Error(err);
+        next(err);
       }
     },
   ],

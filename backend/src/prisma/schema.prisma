@@ -19,6 +19,7 @@ model User {
   name       String @unique
   password   String
   posts      Post[]
+  file       File?
   followedBy User[] @relation("UserFollowers")
   following  User[] @relation("UserFollowers")
 }
@@ -35,8 +36,10 @@ model Post {
 
 model File {
   id        Int      @id @default(autoincrement())
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  postId    Int      @unique
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  postId    Int?     @unique
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    Int?     @unique
   public_id String
   url       String
   bytes     Int
@@ -47,5 +50,4 @@ model File {
 enum FileType {
   Post
   Profile
-  Comment
 }
