@@ -1,77 +1,75 @@
 import prisma from "../lib/prisma.js";
 import profileImgUploader from "../lib/profileImgUploader.js";
+
 const userController = {
   follow: async (req, res) => {
     const requestingUserId = Number(req.user.id);
     const requestedUserId = Number(req.params.userId);
-    if (requestedUserId === requestedUserId) {
+
+    if (requestedUserId === requestingUserId) {
       throw new Error(
         "You cannot follow yourself. User following cannot be the same as user being followed.",
       );
     }
-    const followingUser = await prisma.user.update({
+
+    const alreadyFollows = await prisma.follows.findUnique({
       where: {
-        id: requestingUserId,
-      },
-      data: {
-        following: {
-          connect: {
-            id: requestedUserId,
-          },
+        followerId_followingId: {
+          followingId: requestedUserId,
+          followerId: requestingUserId,
         },
       },
     });
-    const followedUser = await prisma.user.update({
-      where: {
-        id: requestedUserId,
-      },
+
+    if (alreadyFollows) {
+      throw new Error("You already follow this user.");
+    }
+
+    const follow = await prisma.follows.create({
       data: {
-        followedBy: {
-          connect: {
-            id: requestingUserId,
-          },
-        },
+        followingId: requestedUserId,
+        followerId: requestingUserId,
       },
     });
+
     return res.json({
-      followingUser,
-      followedUser,
-      msg: `Successfully Followed ${followedUser.name}`,
+      follow,
+      msg: `Successfully followed user`,
     });
   },
+
   unfollow: async (req, res) => {
     const requestingUserId = Number(req.user.id);
     const requestedUserId = Number(req.params.userId);
-    const unfollowingUser = await prisma.user.update({
+
+    const match = await prisma.follows.findUnique({
       where: {
-        id: requestingUserId,
-      },
-      data: {
-        following: {
-          disconnect: {
-            id: requestedUserId,
-          },
+        followingId_followedById: {
+          followingId: requestedUserId,
+          followerId: requestingUserId,
         },
       },
     });
-    const unfollowedUser = await prisma.user.update({
+
+    if (!match) {
+      throw new Error("You cannot unfollow a user that you do not follow");
+    }
+
+    const unfollow = await prisma.follows.delete({
       where: {
-        id: requestedUserId,
-      },
-      data: {
-        followedBy: {
-          disconnect: {
-            id: requestingUserId,
-          },
+        followingId_followedById: {
+          followingId: requestedUserId,
+          followerId: requestingUserId,
         },
       },
     });
+
     return res.json({
-      unfollowingUser,
-      unfollowedUser,
-      msg: `Successfully Unfollwed ${unfollowedUser.name}`,
+      unfollow,
+      msg: `Successfully unfollowed the user`,
     });
   },
+
   getUserInfo: async (req, res) => {
     const user = await prisma.user.findUnique({
       where: {
@@ -80,7 +78,7 @@ const userController = {
       include: {
         _count: {
           select: {
-            followedBy: true,
+            follower: true,
             following: true,
           },
         },
@@ -88,44 +86,75 @@ const userController = {
     });
     return res.json(user);
   },
+
   changeProfile: async (req, res) => {
     if (!req.file) {
       throw new Error("File is required for this route.");
     }
     const file = await profileImgUploader.replace(req, req.user.id);
-    return res.josn(file);
+    return res.json(file);
   },
+
   getFollowers: async (req, res) => {
     const userId = Number(req.params.userId);
-    const followers = await prisma.user.findUnique({
+
+    let followers = await prisma.follows.findMany({
       where: {
-        id: userId,
-      },
-      select: {
-        followedBy: {
-          include: {
-            file: true,
-          },
-        },
-      },
-    });
-    return res.json(followers);
-  },
-  getFollowingUsers: async (req, res) => {
-    const userId = Number(req.params.userId);
-    const followingUsers = await prisma.user.findUnique({
-      where: {
-        id: userId,
+        followingId: userId,
       },
       select: {
         following: {
-          include: {
+          select: {
+            id: true,
+            name: true,
             file: true,
           },
         },
       },
+      orderBy: {
+        startDate: "desc",
+      },
     });
-    return res.json(followingUsers);
+
+    if (!followers || followers.length === 0) {
+      return res.json({
+        msg: "The user does not have any followers",
+        followers: [],
+      });
+    }
+    return res.json(followers);
+  },
+
+  getFollowingUsers: async (req, res) => {
+    const userId = Number(req.params.userId);
+
+    const followingUsers = await prisma.follows.findMany({
+      where: {
+        followerId: userId,
+      },
+      select: {
+        following: {
+          select: {
+            id: true,
+            name: true,
+            file: true,
+          },
+        },
+      },
+      orderBy: {
+        startData: "desc",
+      },
+    });
+
+    if (!followingUsers || followingUsers.length === 0) {
+      return res.json({
+        msg: "The user does not follow anyone",
+        following: [],
+      });
+    }
+
+    const following = followingUsers.map((f) => f.following);
+    return res.json(following);
   },
 };
 

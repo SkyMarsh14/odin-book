@@ -15,13 +15,23 @@ datasource db {
 }
 
 model User {
-  id         Int    @id @default(autoincrement())
-  name       String @unique
-  password   String
-  posts      Post[]
-  file       File?
-  followedBy User[] @relation("UserFollowers")
-  following  User[] @relation("UserFollowers")
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  password  String
+  posts     Post[]
+  file      File?
+  followers Follows[] @relation("follower")
+  following Follows[] @relation("following")
+}
+
+model Follows {
+  follower    User     @relation("follower", fields: [followerId], references: [id])
+  followerId  Int
+  following   User     @relation("following", fields: [followingId], references: [id])
+  followingId Int
+  startData   DateTime @default(now())
+
+  @@id([followerId, followingId])
 }
 
 model Post {
