@@ -31,7 +31,6 @@ const userController = {
         followerId: requestingUserId,
       },
     });
-
     return res.json({
       follow,
       msg: `Successfully followed user`,
@@ -44,7 +43,7 @@ const userController = {
 
     const match = await prisma.follows.findUnique({
       where: {
-        followingId_followedById: {
+        followerId_followingId: {
           followingId: requestedUserId,
           followerId: requestingUserId,
         },
@@ -57,7 +56,7 @@ const userController = {
 
     const unfollow = await prisma.follows.delete({
       where: {
-        followingId_followedById: {
+        followerId_followingId: {
           followingId: requestedUserId,
           followerId: requestingUserId,
         },
@@ -78,7 +77,7 @@ const userController = {
       include: {
         _count: {
           select: {
-            follower: true,
+            followers: true,
             following: true,
           },
         },
@@ -97,7 +96,6 @@ const userController = {
 
   getFollowers: async (req, res) => {
     const userId = Number(req.params.userId);
-
     let followers = await prisma.follows.findMany({
       where: {
         followingId: userId,
@@ -115,7 +113,6 @@ const userController = {
         startDate: "desc",
       },
     });
-
     if (!followers || followers.length === 0) {
       return res.json({
         msg: "The user does not have any followers",
@@ -127,13 +124,12 @@ const userController = {
 
   getFollowingUsers: async (req, res) => {
     const userId = Number(req.params.userId);
-
     const followingUsers = await prisma.follows.findMany({
       where: {
         followerId: userId,
       },
       select: {
-        following: {
+        follower: {
           select: {
             id: true,
             name: true,
@@ -142,10 +138,9 @@ const userController = {
         },
       },
       orderBy: {
-        startData: "desc",
+        startDate: "desc",
       },
     });
-
     if (!followingUsers || followingUsers.length === 0) {
       return res.json({
         msg: "The user does not follow anyone",
@@ -153,8 +148,7 @@ const userController = {
       });
     }
 
-    const following = followingUsers.map((f) => f.following);
-    return res.json(following);
+    return res.json(followingUsers);
   },
 };
 
