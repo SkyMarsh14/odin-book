@@ -9,13 +9,14 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  password  String
-  posts     Post[]
-  file      File?
-  followers Follows[] @relation("following")
-  following Follows[] @relation("follower")
+  id         Int       @id @default(autoincrement())
+  name       String    @unique
+  password   String
+  posts      Post[]
+  file       File?
+  followers  Follows[] @relation("following")
+  following  Follows[] @relation("follower")
+  likedPosts Post[]    @relation("likedPost")
 }
 
 model Follows {
@@ -31,7 +32,6 @@ model Follows {
 model Post {
   id           Int      @id @default(autoincrement())
   content      String?
-  like         Int      @default(0)
   createdAt    DateTime @default(now())
   author       User     @relation(fields: [authorId], references: [id])
   authorId     Int
@@ -39,6 +39,7 @@ model Post {
   parentPostId Int?
   parentPost   Post?    @relation("postComments", fields: [parentPostId], references: [id])
   comments     Post[]   @relation("postComments")
+  likedBy      User[]   @relation("likedPost")
 }
 
 model File {

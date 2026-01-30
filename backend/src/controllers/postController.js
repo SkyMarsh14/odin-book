@@ -11,10 +11,36 @@ const postController = {
       },
       include: {
         file: true,
-        comments: true,
       },
     });
     return res.json(post);
+  },
+  getComment: async (req, res) => {
+    const postId = +req.params.postId;
+    const comments = await prisma.post.findMany({
+      where: {
+        parentPostId: postId,
+      },
+      include: {
+        file: true,
+      },
+    });
+    return res.json(comments);
+  },
+  getUserPost: async (req, res) => {
+    const posts = await prisma.user.findUnique({
+      where: {
+        id: +req.user.id,
+      },
+      select: {
+        posts: {
+          include: {
+            file: true,
+          },
+        },
+      },
+    });
+    return res.json(posts);
   },
   create: [
     validator.postValidation,
@@ -114,6 +140,60 @@ const postController = {
       },
     });
     return res.json(post);
+  },
+  likePost: async (req, res) => {
+    const postId = +req.params.postId;
+    const like = await prisma.post.update({
+      where: {
+        id: postId,
+      },
+      data: {
+        likedBy: {
+          connect: {
+            id: req.user.id,
+          },
+        },
+      },
+      include: {
+        likedBy: true,
+      },
+    });
+    return res.json(like);
+  },
+  unlikePost: async (req, res) => {
+    const postId = +req.params.postId;
+    const unlike = await prisma.post.update({
+      where: {
+        id: postId,
+      },
+      data: {
+        likedBy: {
+          disconnect: {
+            id: req.user.id,
+          },
+        },
+      },
+    });
+    return res.json(unlike);
+  },
+  getLikedBy: async (req, res) => {
+    const postId = +req.params.postId;
+    const users = await prisma.post.findUniqueOrThrow({
+      where: {
+        id: postId,
+      },
+      select: {
+        likedBy: {
+          include: {
+            file: true,
+          },
+        },
+      },
+    });
+    if (!users) {
+      return res.json({ msg: "Not one has liked the post yet", users: [] });
+    }
+    return res.json(users);
   },
 };
 export default postController;

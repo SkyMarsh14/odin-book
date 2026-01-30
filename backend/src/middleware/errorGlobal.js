@@ -7,6 +7,7 @@ const errorGlobal = (err, req, res, next) => {
   }
   res.status(statusCode).json({
     success: false,
+    path: req.originalUrl,
     error: message,
   });
 };
