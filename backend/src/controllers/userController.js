@@ -150,6 +150,18 @@ const userController = {
 
     return res.json(followingUsers);
   },
+  search: async (req, res) => {
+    const query = req.query.name;
+    const users = await prisma.user.findMany({
+      where: {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+    });
+    return res.json(users);
+  },
 };
 
 export default userController;

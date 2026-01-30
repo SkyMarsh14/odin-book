@@ -11,6 +11,12 @@ const postController = {
       },
       include: {
         file: true,
+        _count: {
+          select: {
+            likedBy: true,
+            comments: true,
+          },
+        },
       },
     });
     return res.json(post);
@@ -36,6 +42,12 @@ const postController = {
         posts: {
           include: {
             file: true,
+            _count: {
+              select: {
+                comments: true,
+                likedBy: true,
+              },
+            },
           },
         },
       },
@@ -97,7 +109,7 @@ const postController = {
   },
   edit: [
     validator.postValidation,
-    async (req, res, next) => {
+    async (req, res) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
