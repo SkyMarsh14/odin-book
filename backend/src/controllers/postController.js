@@ -4,20 +4,21 @@ import postImgUploader from "../lib/postImgUplaoder.js";
 import { validationResult } from "express-validator";
 import { v2 as cloudinary } from "cloudinary";
 const postController = {
-  getPost: async (req, res, next) => {
+  getPost: async (req, res) => {
     const post = await prisma.post.findUnique({
       where: {
         id: +req.params.postId,
       },
       include: {
         file: true,
+        comments: true,
       },
     });
     return res.json(post);
   },
   create: [
     validator.postValidation,
-    async (req, res, next) => {
+    async (req, res) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -25,11 +26,13 @@ const postController = {
       let response = {};
       const content = req.body?.content;
       const file = req?.file;
+      const parentPostId = +req.body?.parentPostId;
 
       const post = await prisma.post.create({
         data: {
           authorId: req.user.id,
           ...(content && { content: content }), // Spread operator to add content property only if it exists
+          ...(parentPostId && { parentPostId: parentPostId }),
         },
       });
       response.post = post;

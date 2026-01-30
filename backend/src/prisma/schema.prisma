@@ -29,13 +29,16 @@ model Follows {
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
-  content   String?
-  like      Int      @default(0)
-  createdAt DateTime @default(now())
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  file      File?
+  id           Int      @id @default(autoincrement())
+  content      String?
+  like         Int      @default(0)
+  createdAt    DateTime @default(now())
+  author       User     @relation(fields: [authorId], references: [id])
+  authorId     Int
+  file         File?
+  parentPostId Int?
+  parentPost   Post?    @relation("postComments", fields: [parentPostId], references: [id])
+  comments     Post[]   @relation("postComments")
 }
 
 model File {
