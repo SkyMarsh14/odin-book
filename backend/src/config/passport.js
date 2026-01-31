@@ -1,5 +1,6 @@
 import passport from "passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
+import { Strategy as GitHubStrategy } from "passport-github";
 import prisma from "../lib/prisma.js";
 
 const opts = {
