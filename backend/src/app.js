@@ -2,6 +2,7 @@ import express from "express";
 import "dotenv/config";
 import cors from "cors";
 import "./config/passport.js";
+import cookieSession from "cookie-session";
 import passport from "passport";
 import authRouter from "./routes/authRouter.js";
 import errorGlobal from "./middleware/errorGlobal.js";
@@ -13,7 +14,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.use(
+  cookieSession({
+    name: "github-auth-session",
+    keys: ["key1", "key2"],
+  }),
+);
+app.use(passport.initialize());
+app.use(passport.session());
 app.use("/", authRouter);
 app.use("/post", passport.authenticate("jwt", { session: false }), postRouter);
 app.use("/user", passport.authenticate("jwt", { session: false }), userRouter);
