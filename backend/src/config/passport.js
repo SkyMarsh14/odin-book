@@ -21,23 +21,3 @@ passport.use(
     }
   }),
 );
-passport.serializeUser(function (user, done) {
-  done(null, user);
-});
-passport.deserializeUser(function (user, done) {
-  done(null, user);
-});
-passport.use(
-  new GitHubStrategy(
-    {
-      clientID: process.env.OAUTH_CLIENT_ID,
-      clientSecret: process.env.OAUTH_CLIENT_SECRET,
-      callbackURL: process.env.OAUTH_CALLBACK_URL,
-    },
-    function (accessToken, refreshToken, profile, done) {
-      User.findOrCreate({ githubId: profile.id }, function (err, user) {
-        return done(err, user);
-      });
-    },
-  ),
-);

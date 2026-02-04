@@ -72,26 +72,36 @@ const authController = {
       }
     },
   ],
-  guestLogin: async (req, res, next) => {
-    try {
-      const { id, name } = await prisma.user.findUnique({
-        where: {
-          username: "Guest",
-        },
-      });
-      delete user.password;
-      const token = jwt.sign(
-        {
-          id,
-          name,
-        },
-        process.env.TOKEN_SECRET,
-        { expiresIn: "1h" },
-      );
-      return res.json({ token, user });
-    } catch (err) {
-      next(err);
-    }
+  guestLogin: async (req, res) => {
+    const { id, name } = await prisma.user.findUnique({
+      where: {
+        username: "Guest",
+      },
+    });
+    delete user.password;
+    const token = jwt.sign(
+      {
+        id,
+        name,
+      },
+      process.env.TOKEN_SECRET,
+      { expiresIn: "1h" },
+    );
+    return res.json({ token, user });
+  },
+  githubLogin: async (req, res) => {
+    const github_access_token_url =
+      "https://github.com/login/oauth/access_token";
+    const url = `${github_access_token_url}?client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${req.query.code}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Accept-Encoding": "application/json",
+      },
+    });
+    const githubUserData = await response.json();
+    return res.json(githubUserData);
   },
 };
 

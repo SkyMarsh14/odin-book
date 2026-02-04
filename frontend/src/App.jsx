@@ -9,11 +9,19 @@ function App() {
     window.location.href = githubAuthUrl;
   };
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    if (!code) return;
-    const target = `http://localhost:3000/`;
-  });
+    async function handleAuth() {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      if (!code) return;
+      const url = `http://localhost:3000/github/access-token?code=${code}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.access_token) {
+        localStorage.setItem("token", data.access_token);
+      }
+    }
+    handleAuth();
+  }, []);
   return (
     <>
       <div>
@@ -36,8 +44,8 @@ function App() {
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
-      <div class="github-signin-container">
-        <button class="github-signin-btn" onClick={handleGithubLogin}>
+      <div>
+        <button onClick={handleGithubLogin}>
           <img
             src="https://cdn.pixabay.com/photo/2022/01/30/13/33/github-6980894_1280.png"
             alt="GitHub Icon"

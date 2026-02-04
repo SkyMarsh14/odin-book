@@ -20,8 +20,6 @@ app.use(
     keys: ["key1", "key2"],
   }),
 );
-app.use(passport.initialize());
-app.use(passport.session());
 app.use("/", authRouter);
 app.use("/post", passport.authenticate("jwt", { session: false }), postRouter);
 app.use("/user", passport.authenticate("jwt", { session: false }), userRouter);
