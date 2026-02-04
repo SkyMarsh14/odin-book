@@ -3,8 +3,15 @@ import { ExtractJwt, Strategy as JwtStrategy } from "passport-jwt";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import prisma from "../lib/prisma.js";
 
+const extractCookie = (req) => {
+  let token = null;
+  if (req && req.cookies) {
+    token = req.cookies["token"];
+  }
+  return token;
+};
 const opts = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: extractCookie,
   secretOrKey: process.env.TOKEN_SECRET,
 };
 passport.use(

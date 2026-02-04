@@ -64,9 +64,17 @@ const authController = {
             email: user.email,
           },
           process.env.TOKEN_SECRET,
-          { expiresIn: "10h" },
+          { expiresIn: "2d" },
         );
-        return res.json({ token, user });
+        res.cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+          maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
+          path: "/",
+          partitioned: process.env.NODE_ENV === "production",
+        });
+        return res.json(user);
       } catch (err) {
         next(err);
       }
