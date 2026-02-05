@@ -6,13 +6,15 @@ import cookieParser from "cookie-parser";
 import cookieConfig from "./config/cookie.js";
 import session from "express-session";
 import passport from "passport";
+import connection from "connect-pg-simple";
 import authRouter from "./routes/authRouter.js";
 import errorGlobal from "./middleware/errorGlobal.js";
 import postRouter from "./routes/postRouter.js";
 import userRouter from "./routes/userRouter.js";
 import fileRouter from "./routes/fileRouter.js";
 import isAuthenticated from "./middleware/isAuthenticated.js";
-
+import pool from "./lib/pool.js";
+const pgSession = connection(session);
 const app = express();
 app.use(
   cors({
@@ -22,6 +24,11 @@ app.use(
 );
 app.use(
   session({
+    store: new pgSession({
+      pool: pool,
+      createTableIfMissing: true,
+    }),
+
     secret: process.env.TOKEN_SECRET,
     resave: false,
     saveUninitialized: false,

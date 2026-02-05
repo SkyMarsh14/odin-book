@@ -25,6 +25,7 @@
     "@quixo3/prisma-session-store": "^3.1.13",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.8.0",
+    "connect-pg-simple": "^10.0.0",
     "cookie-parser": "^1.4.7",
     "cookie-session": "^2.1.1",
     "cors": "^2.8.5",
@@ -40,6 +41,7 @@
     "passport-github2": "^0.1.12",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "pg": "^8.18.0",
     "string-to-color": "^2.2.2"
   }
 }

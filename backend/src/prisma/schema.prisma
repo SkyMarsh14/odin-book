@@ -12,19 +12,19 @@ model User {
   id         Int       @id @default(autoincrement())
   name       String    @unique
   password   String
-  posts      Post[]
   file       File?
-  followers  Follows[] @relation("following")
   following  Follows[] @relation("follower")
+  followers  Follows[] @relation("following")
+  posts      Post[]
   likedPosts Post[]    @relation("likedPost")
 }
 
 model Follows {
-  follower    User     @relation("follower", fields: [followerId], references: [id])
-  followerId  Int
-  following   User     @relation("following", fields: [followingId], references: [id])
   followingId Int
   startDate   DateTime @default(now())
+  followerId  Int
+  follower    User     @relation("follower", fields: [followerId], references: [id])
+  following   User     @relation("following", fields: [followingId], references: [id])
 
   @@id([followerId, followingId])
 }
@@ -33,10 +33,10 @@ model Post {
   id           Int      @id @default(autoincrement())
   content      String?
   createdAt    DateTime @default(now())
-  author       User     @relation(fields: [authorId], references: [id])
   authorId     Int
-  file         File?
   parentPostId Int?
+  file         File?
+  author       User     @relation(fields: [authorId], references: [id])
   parentPost   Post?    @relation("postComments", fields: [parentPostId], references: [id])
   comments     Post[]   @relation("postComments")
   likedBy      User[]   @relation("likedPost")
@@ -44,15 +44,23 @@ model Post {
 
 model File {
   id        Int      @id @default(autoincrement())
-  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   postId    Int?     @unique
-  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId    Int?     @unique
   public_id String
   url       String
   bytes     Int
   mimetype  String
   type      FileType
+  userId    Int?     @unique
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model session {
+  sid    String   @id @db.VarChar
+  sess   Json     @db.Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire], map: "IDX_session_expire")
 }
 
 enum FileType {
