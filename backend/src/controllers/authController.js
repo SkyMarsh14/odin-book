@@ -5,6 +5,7 @@ import prisma from "../lib/prisma.js";
 import jwt from "jsonwebtoken";
 import createUser from "../lib/createUser.js";
 import profileImgUploader from "../lib/profileImgUploader.js";
+import cookieConfig from "../config/cookie.js";
 
 const authController = {
   createUser: [
@@ -67,12 +68,7 @@ const authController = {
           { expiresIn: "2d" },
         );
         res.cookie("token", token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-          maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
-          path: "/",
-          partitioned: process.env.NODE_ENV === "production",
+          cookieConfig,
         });
         return res.json(user);
       } catch (err) {

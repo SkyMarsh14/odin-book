@@ -1,30 +1,44 @@
 import passport from "passport";
-import { ExtractJwt, Strategy as JwtStrategy } from "passport-jwt";
-import { Strategy as GitHubStrategy } from "passport-github2";
+import bcrypt from "bcryptjs";
+import { Strategy as JwtStrategy } from "passport-jwt";
+import { Strategy as localStrategy } from "passport-local";
 import prisma from "../lib/prisma.js";
 
-const extractCookie = (req) => {
-  let token = null;
-  if (req && req.cookies) {
-    token = req.cookies["token"];
-  }
-  return token;
-};
-const opts = {
-  jwtFromRequest: extractCookie,
-  secretOrKey: process.env.TOKEN_SECRET,
-};
 passport.use(
-  new JwtStrategy(opts, async (payload, done) => {
+  new localStrategy(async (username, password, done) => {
     try {
       const user = await prisma.user.findUnique({
         where: {
-          id: payload.id,
+          name: username,
+        },
+        omit: {
+          password: false,
         },
       });
-      return user ? done(null, user) : done(null, false);
+      if (!user) return done(err);
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) {
+        return done(null, false);
+      }
+      return done(null, user);
     } catch (err) {
-      return done(err, false);
+      return done(err);
     }
   }),
 );
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+});
