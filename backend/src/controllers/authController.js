@@ -94,18 +94,40 @@ const authController = {
     return res.json({ token, user });
   },
   githubLogin: async (req, res) => {
-    const github_access_token_url =
-      "https://github.com/login/oauth/access_token";
-    const url = `${github_access_token_url}?client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${req.query.code}`;
-    const response = await fetch(url, {
-      method: "GET",
+    const { code } = req.query;
+    const exchangeUrl = new URL(
+      "login/oauth/access_token",
+      "https://github.com",
+    );
+    exchangeUrl.searchParams.set("client_id", process.env.GITHUB_CLIENT_ID);
+    exchangeUrl.searchParams.set(
+      "client_secret",
+      process.env.GITHUB_CLIENT_SECRET,
+    );
+    exchangeUrl.searchParams.set("code", code);
+    const tokenResponse = await fetch(exchangeUrl, {
+      method: "POST",
       headers: {
         Accept: "application/json",
-        "Accept-Encoding": "application/json",
       },
     });
-    const githubUserData = await response.json();
-    return res.json(githubUserData);
+    const tokenData = await tokenResponse.json();
+    if (!tokenData?.access_token) {
+      if (tokenData?.error) {
+        throw new Error(tokenData?.error);
+      } else {
+        throw new Error(
+          `External server error. Failed to fetch token data from Github server`,
+        );
+      }
+    }
+    const userResponse = await fetch("https://api.github.com/user", {
+      headers: {
+        Authorization: `Bearer ${tokenData.access_token}`,
+        Accept: "application/json",
+      },
+    });
+    const userData = await userResponse.json();
   },
 };
 

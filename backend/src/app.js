@@ -37,16 +37,14 @@ app.use(
     },
   }),
 );
-app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.post("/login", passport.authenticate("local"));
 app.use("/", authRouter);
 app.use("/post", isAuthenticated, postRouter);
-app.use("/user", passport.authenticate("jwt", { session: false }), userRouter);
-app.use("/file", passport.authenticate("jwt", { session: false }), fileRouter);
+app.use("/user", isAuthenticated, userRouter);
+app.use("/file", isAuthenticated, fileRouter);
 app.use(errorGlobal);
 
 app.use("/*w", (req, res) => {

@@ -9,14 +9,15 @@ datasource db {
 }
 
 model User {
-  id         Int       @id @default(autoincrement())
-  name       String    @unique
-  password   String
-  file       File?
-  following  Follows[] @relation("follower")
-  followers  Follows[] @relation("following")
-  posts      Post[]
-  likedPosts Post[]    @relation("likedPost")
+  id              Int       @id @default(autoincrement())
+  name            String    @unique
+  password        String?
+  file            File?
+  githubAvatarUrl String?
+  following       Follows[] @relation("follower")
+  followers       Follows[] @relation("following")
+  posts           Post[]
+  likedPosts      Post[]    @relation("likedPost")
 }
 
 model Follows {

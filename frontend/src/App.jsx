@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./App.css";
 function App() {
   const handleGithubLogin = () => {
-    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_REDIRECT_URI}&scope=read:user`;
-    window.location.href = githubAuthUrl;
+    window.location = "http://localhost:3000/auth/github";
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,23 +21,8 @@ function App() {
       body: formBody,
       credentials: "include",
     });
-    const data = await response.json();
-    console.log(data);
+    navigate("/");
   };
-  useEffect(() => {
-    async function handleAuth() {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-      if (!code) return;
-      const url = `http://localhost:3000/github/access-token?code=${code}`;
-      const response = await fetch(url);
-      const data = await response.json();
-      if (data.access_token) {
-        localStorage.setItem("token", data.access_token);
-      }
-    }
-    handleAuth();
-  }, []);
   return (
     <>
       <div>
