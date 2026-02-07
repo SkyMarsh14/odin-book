@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "./App.css";
-function App() {
+import styles from "./login.module.css";
+function Login() {
   const handleGithubLogin = () => {
     window.location = "http://localhost:3000/auth/github";
   };
@@ -21,11 +19,30 @@ function App() {
       body: formBody,
       credentials: "include",
     });
-    navigate("/");
+    if (!response.ok) {
+      throw new Error("Failed to fetch");
+    }
   };
   return (
-    <>
-      <div>
+    <div className={styles.wrapper}>
+      <div className={styles["content-container"]}>
+        <div className={styles["sign-in-container"]}>
+          <div className={styles["comfortaa-title"]}>Join Vibely</div>
+          <div className={styles["nunito-regular"]}>
+            Sign in to continue Vibely
+          </div>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="">Name</label>
+            <input name="username" type="text" />
+          </div>
+          <div>
+            <label htmlFor="">Password</label>
+            <input name="password" type="text" />
+          </div>
+          <button type="submit">Submit</button>
+        </form>
         <button onClick={handleGithubLogin}>
           <img
             src="https://cdn.pixabay.com/photo/2022/01/30/13/33/github-6980894_1280.png"
@@ -35,19 +52,8 @@ function App() {
           Sign in with GitHub
         </button>
       </div>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="">Name</label>
-          <input name="username" type="text" />
-        </div>
-        <div>
-          <label htmlFor="">Password</label>
-          <input name="password" type="text" />
-        </div>
-        <button type="submit">Submit</button>
-      </form>
-    </>
+    </div>
   );
 }
 
-export default App;
+export default Login;
