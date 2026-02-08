@@ -1,12 +1,11 @@
 import { Router } from "express";
 import authController from "../controllers/authController.js";
 import imgUpload from "../middleware/imgUpload.js";
-import isAuthenticated from "../middleware/isAuthenticated.js";
 import passport from "passport";
 const authRouter = Router();
 
 authRouter.post(
-  "/create-user",
+  "/sign-up",
   imgUpload.single("image"),
   authController.createUser,
 );

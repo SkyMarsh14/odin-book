@@ -1,8 +1,12 @@
 import Login from "../pages/Login/Login";
 const routes = [
   {
-    path: "/",
+    path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/sign-up",
+    element: <Login signUp={true} />,
   },
 ];
 

@@ -1,30 +1,21 @@
 import styles from "./login.module.css";
 import appLogo from "../../assets/logo.svg";
 import githubLogo from "../../assets/GitHub_Invertocat_White.svg";
-function Login() {
+import auth from "../../api/auth.js";
+function Login({ signUp }) {
   const handleGithubLogin = () => {
     window.location = "http://localhost:3000/auth/github";
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    let formBody = {};
-    for (let [key, value] of formData.entries()) {
-      formBody[key] = value;
-    }
-    formBody = JSON.stringify(formBody);
-    const response = await fetch("http://localhost:3000/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: formBody,
-      credentials: "include",
-    });
-    if (!response.ok) {
-      throw new Error("Failed to fetch");
+    const formElement = e.target;
+    if (signUp) {
+      await auth.signUp(formElement);
+    } else {
+      await auth.login(formElement);
     }
   };
+
   return (
     <div className={styles.wrapper}>
       <div className={styles["content-container"]}>
@@ -33,9 +24,13 @@ function Login() {
             <img src={appLogo} alt="Vibely Logo" className={styles.logo} />
             <div className={styles["mogra-regular"]}>Vibely</div>
           </div>
-          <div className={styles["comfortaa-title"]}>Welcome Back</div>
+          <div className={styles["comfortaa-title"]}>
+            {signUp ? "Join Vibely" : "Welcome back"}
+          </div>
           <div className={`${styles["nunito-regular"]} ${styles.subtitle}`}>
-            Sign in to continue Vibely
+            {signUp
+              ? "Create your account to get started"
+              : "Sign in to continue Vibely"}
           </div>
         </div>
         <form onSubmit={handleSubmit}>
@@ -63,8 +58,20 @@ function Login() {
               placeholder="••••••••"
             />
           </div>
+          {signUp && (
+            <div className={styles["form-field"]}>
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <input
+                name="confirmPassword"
+                id="confirmPassword"
+                type="password"
+                className={styles.input}
+                placeholder="••••••••"
+              />
+            </div>
+          )}
           <button type="submit" className={styles["submit-btn"]}>
-            Submit
+            {signUp ? "Sign Up" : "Login"}
           </button>
         </form>
 
@@ -80,6 +87,17 @@ function Login() {
           <div className={styles["figtree-normal"]}>Sign in with GitHub</div>
         </button>
         <button className={styles["guest-button"]}>Continue as a Gueset</button>
+        <div className={styles["signup-link"]}>
+          {signUp ? (
+            <>
+              Don't have an account? <a href="/login">Login</a>
+            </>
+          ) : (
+            <>
+              Already have an account? <a href="/sign-up">Sign Up</a>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

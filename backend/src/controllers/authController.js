@@ -1,11 +1,9 @@
 import { validationResult } from "express-validator";
 import validator from "../lib/validator.js";
-import bcrypt from "bcryptjs";
 import prisma from "../lib/prisma.js";
 import jwt from "jsonwebtoken";
 import createUser from "../lib/createUser.js";
 import profileImgUploader from "../lib/profileImgUploader.js";
-import cookieConfig from "../config/cookie.js";
 
 const authController = {
   createUser: [
@@ -31,51 +29,17 @@ const authController = {
       }
     },
   ],
-  login: [
-    validator.login,
-    async (req, res, next) => {
-      try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-          return res.status(400).json({ errors: errors.array() });
-        }
-        const { username, password } = req.body;
-        const user = await prisma.user.findUnique({
-          where: {
-            name: username,
-          },
-          omit: {
-            password: false,
-          },
-        });
-        if (!user)
-          return res
-            .status(401)
-            .json([{ msg: "User with the given credentails not found." }]);
-        if (user) {
-          const match = await bcrypt.compare(password, user.password);
-          if (!match)
-            return res.status(401).json([{ msg: "Incorrect credentials" }]);
-        }
-        delete user.password;
-        const token = jwt.sign(
-          {
-            id: user.id,
-            name: username,
-            email: user.email,
-          },
-          process.env.TOKEN_SECRET,
-          { expiresIn: "2d" },
-        );
-        res.cookie("token", token, {
-          cookieConfig,
-        });
-        return res.json(user);
-      } catch (err) {
-        next(err);
-      }
-    },
-  ],
+  login: async (req, res) => {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.user.id,
+      },
+      include: {
+        file: true,
+      },
+    });
+    return res.json({ user, msg: "Login successfull" });
+  },
   guestLogin: async (req, res) => {
     const { id, name } = await prisma.user.findUnique({
       where: {
