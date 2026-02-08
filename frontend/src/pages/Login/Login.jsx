@@ -1,4 +1,6 @@
 import styles from "./login.module.css";
+import appLogo from "../../assets/logo.svg";
+import githubLogo from "../../assets/GitHub_Invertocat_White.svg";
 function Login() {
   const handleGithubLogin = () => {
     window.location = "http://localhost:3000/auth/github";
@@ -27,30 +29,57 @@ function Login() {
     <div className={styles.wrapper}>
       <div className={styles["content-container"]}>
         <div className={styles["sign-in-container"]}>
-          <div className={styles["comfortaa-title"]}>Join Vibely</div>
-          <div className={styles["nunito-regular"]}>
+          <div className={styles["logo-container"]}>
+            <img src={appLogo} alt="Vibely Logo" className={styles.logo} />
+            <div className={styles["mogra-regular"]}>Vibely</div>
+          </div>
+          <div className={styles["comfortaa-title"]}>Welcome Back</div>
+          <div className={`${styles["nunito-regular"]} ${styles.subtitle}`}>
             Sign in to continue Vibely
           </div>
         </div>
         <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="">Name</label>
-            <input name="username" type="text" />
+          <div className={styles["form-field"]}>
+            <label htmlFor="username" className={styles.label}>
+              Username
+            </label>
+            <input
+              name="username"
+              id="username"
+              type="text"
+              className={styles.input}
+              placeholder="Enter your username"
+            />
           </div>
-          <div>
-            <label htmlFor="">Password</label>
-            <input name="password" type="text" />
+          <div className={styles["form-field"]}>
+            <label htmlFor="password" className={styles.label}>
+              Password
+            </label>
+            <input
+              name="password"
+              id="password"
+              type="password"
+              className={styles.input}
+              placeholder="••••••••"
+            />
           </div>
-          <button type="submit">Submit</button>
+          <button type="submit" className={styles["submit-btn"]}>
+            Submit
+          </button>
         </form>
-        <button onClick={handleGithubLogin}>
+
+        <div className={styles["horizontal-line"]}>
+          <span>Or continue with</span>
+        </div>
+        <button onClick={handleGithubLogin} className={styles["github-button"]}>
           <img
-            src="https://cdn.pixabay.com/photo/2022/01/30/13/33/github-6980894_1280.png"
+            className={styles["github-img"]}
+            src={githubLogo}
             alt="GitHub Icon"
-            className="img"
           />
-          Sign in with GitHub
+          <div className={styles["figtree-normal"]}>Sign in with GitHub</div>
         </button>
+        <button className={styles["guest-button"]}>Continue as a Gueset</button>
       </div>
     </div>
   );
